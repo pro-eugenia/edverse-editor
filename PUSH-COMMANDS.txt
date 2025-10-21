@@ -1,0 +1,17 @@
+# Команды для пуша в GitHub
+
+cd /Users/pro_eugenia/Desktop/edverse-editor-deploy
+
+git remote add origin https://github.com/ТВОЙ_USERNAME/edverse-editor.git
+git branch -M main
+git push -u origin main
+
+# После выполнения этих команд:
+# 1. Открой https://github.com/ТВОЙ_USERNAME/edverse-editor
+# 2. Settings → Pages
+# 3. Source: Deploy from a branch
+# 4. Branch: main / root
+# 5. Save
+# 6. Подожди 2-3 минуты
+# 7. Редактор будет доступен: https://ТВОЙ_USERNAME.github.io/edverse-editor/
+

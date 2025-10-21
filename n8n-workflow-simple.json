@@ -1,0 +1,204 @@
+{
+  "name": "EdVerse Lessons API",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "edverse-save",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-save",
+      "name": "Webhook Save",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "edverse-load",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-load",
+      "name": "Webhook Load",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 500]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "projectId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "updateKey": "lesson_id",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldName": "lesson_id",
+              "fieldValue": "={{ $json.body.lesson_id }}"
+            },
+            {
+              "fieldName": "content",
+              "fieldValue": "={{ $json.body.content }}"
+            }
+          ]
+        }
+      },
+      "id": "nocodb-save",
+      "name": "NocoDB Save",
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [450, 300],
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "NocoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "projectId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {
+          "filters": {
+            "conditions": [
+              {
+                "field": "lesson_id",
+                "operator": "equals",
+                "value": "={{ $json.query.lesson_id }}"
+              }
+            ]
+          },
+          "limit": 1
+        }
+      },
+      "id": "nocodb-load",
+      "name": "NocoDB Load",
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 4,
+      "position": [450, 500],
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "NocoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'Saved successfully' } }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "response-save",
+      "name": "Response Save",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "response-load",
+      "name": "Response Load",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 500]
+    }
+  ],
+  "connections": {
+    "Webhook Save": {
+      "main": [
+        [
+          {
+            "node": "NocoDB Save",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Load": {
+      "main": [
+        [
+          {
+            "node": "NocoDB Load",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NocoDB Save": {
+      "main": [
+        [
+          {
+            "node": "Response Save",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NocoDB Load": {
+      "main": [
+        [
+          {
+            "node": "Response Load",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
+
