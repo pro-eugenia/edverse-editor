@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Редактор уроков EdVerse</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #10b981;
+      --danger: #dc2626;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #fff;
+      color: var(--gray-900);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      padding: 0;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
+      color: white;
+      padding: 20px 16px;
+      margin: -16px -16px 20px;
+      border-radius: 0 0 16px 16px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .section {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 10px;
+      background: var(--gray-50);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border: 1px solid var(--gray-200);
+    }
+
+    .toolbar-btn {
+      background: white;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--gray-700);
+    }
+
+    .toolbar-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .toolbar-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Editor */
+    .editor-area {
+      min-height: 400px;
+      padding: 16px;
+      border: 2px solid var(--gray-300);
+      border-radius: 10px;
+      background: white;
+      outline: none;
+      font-size: 15px;
+      line-height: 1.6;
+      overflow-y: auto;
+    }
+
+    .editor-area:focus {
+      border-color: var(--primary);
+    }
+
+    .editor-area h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin: 0 0 18px;
+      color: var(--gray-900);
+    }
+
+    .editor-area h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 18px 0 10px;
+      color: var(--gray-900);
+    }
+
+    .editor-area h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 16px 0 8px;
+      color: var(--gray-900);
+    }
+
+    .editor-area p {
+      margin: 10px 0;
+    }
+
+    .editor-area ul, .editor-area ol {
+      margin: 10px 0;
+      padding-left: 24px;
+    }
+
+    .editor-area li {
+      margin: 4px 0;
+    }
+
+    /* Actions */
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--gray-700);
+      border: 1px solid var(--gray-300);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-50);
+    }
+
+    /* Settings */
+    .settings-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+
+    .input-group input,
+    .input-group select {
+      padding: 10px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: var(--primary);
+    }
+
+    /* Status */
+    .status {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+    }
+
+    .status.success {
+      background: #d1fae5;
+      color: #065f46;
+      display: block;
+    }
+
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+      display: block;
+    }
+
+    /* HTML Preview */
+    .html-preview {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--gray-800);
+    }
+
+    /* Insert Dialog */
+    .dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .dialog-overlay.active {
+      display: flex;
+    }
+
+    .dialog {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .dialog-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 12px;
+      }
+
+      .header {
+        margin: -12px -12px 16px;
+        padding: 16px 12px;
+      }
+
+      .header h1 {
+        font-size: 18px;
+      }
+
+      .toolbar {
+        gap: 4px;
+      }
+
+      .toolbar-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📝 Редактор уроков EdVerse</h1>
+      <p>Визуальный редактор контента с автосохранением</p>
+    </div>
+
+    <!-- Settings -->
+    <div class="section">
+      <div class="section-title">⚙️ Настройки подключения</div>
+      <div class="settings-grid">
+        <div class="input-group">
+          <label>API Endpoint (n8n webhook или NocoDB)</label>
+          <input type="url" id="apiEndpoint" placeholder="https://your-n8n.com/webhook/..." value="">
+        </div>
+        <div class="input-group">
+          <label>ID записи (lesson_id)</label>
+          <input type="text" id="lessonId" placeholder="m8_1" value="m8_1">
+        </div>
+        <div class="input-group">
+          <label>Режим работы</label>
+          <select id="apiMode">
+            <option value="n8n">n8n Webhook</option>
+            <option value="nocodb">NocoDB API</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-success" id="loadBtn">📥 Загрузить</button>
+        <button class="btn btn-primary" id="saveBtn">💾 Сохранить</button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+
+    <!-- Editor -->
+    <div class="section">
+      <div class="section-title">✍️ Редактор</div>
+      
+      <div class="toolbar">
+        <button class="toolbar-btn" data-cmd="undo" title="Отменить">↶</button>
+        <button class="toolbar-btn" data-cmd="redo" title="Повторить">↷</button>
+        <button class="toolbar-btn" data-cmd="formatBlock" data-value="h1">H1</button>
+        <button class="toolbar-btn" data-cmd="formatBlock" data-value="h2">H2</button>
+        <button class="toolbar-btn" data-cmd="formatBlock" data-value="h3">H3</button>
+        <button class="toolbar-btn" data-cmd="formatBlock" data-value="p">P</button>
+        <button class="toolbar-btn" data-cmd="bold" title="Жирный"><b>B</b></button>
+        <button class="toolbar-btn" data-cmd="italic" title="Курсив"><i>I</i></button>
+        <button class="toolbar-btn" data-cmd="insertUnorderedList" title="Список">• Список</button>
+        <button class="toolbar-btn" data-cmd="insertOrderedList" title="Нумерация">1. Нумерация</button>
+        <button class="toolbar-btn" data-insert="hint">💡 Подсказка</button>
+        <button class="toolbar-btn" data-insert="code">💻 Код</button>
+        <button class="toolbar-btn" data-insert="spoiler">🔽 Спойлер</button>
+        <button class="toolbar-btn" data-insert="image">🖼️ Картинка</button>
+      </div>
+
+      <div class="editor-area" id="editor" contenteditable="true">
+        <h1>Добро пожаловать в редактор!</h1>
+        <p>Начните редактировать контент урока. Используйте панель инструментов для форматирования.</p>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" id="viewHtmlBtn">👁️ HTML код</button>
+        <button class="btn btn-secondary" id="clearBtn">🗑️ Очистить</button>
+      </div>
+    </div>
+
+    <!-- HTML Preview -->
+    <div class="section" id="htmlSection" style="display: none;">
+      <div class="section-title">📋 HTML код</div>
+      <div class="html-preview" id="htmlPreview"></div>
+      <div class="actions">
+        <button class="btn btn-primary" id="copyHtmlBtn">📋 Копировать</button>
+        <button class="btn btn-secondary" id="closeHtmlBtn">✕ Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insert Dialog -->
+  <div class="dialog-overlay" id="dialogOverlay">
+    <div class="dialog">
+      <div class="dialog-title" id="dialogTitle">Вставить элемент</div>
+      <div id="dialogContent"></div>
+      <div class="dialog-actions">
+        <button class="btn btn-primary" id="dialogInsert">Вставить</button>
+        <button class="btn btn-secondary" id="dialogCancel">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const editor = document.getElementById('editor');
+      const apiEndpoint = document.getElementById('apiEndpoint');
+      const lessonId = document.getElementById('lessonId');
+      const apiMode = document.getElementById('apiMode');
+      const status = document.getElementById('status');
+      const htmlSection = document.getElementById('htmlSection');
+      const htmlPreview = document.getElementById('htmlPreview');
+      const dialogOverlay = document.getElementById('dialogOverlay');
+      const dialogTitle = document.getElementById('dialogTitle');
+      const dialogContent = document.getElementById('dialogContent');
+
+      let currentInsertType = null;
+
+      // Load settings from localStorage
+      const savedEndpoint = localStorage.getItem('apiEndpoint');
+      const savedLessonId = localStorage.getItem('lessonId');
+      const savedMode = localStorage.getItem('apiMode');
+      
+      if (savedEndpoint) apiEndpoint.value = savedEndpoint;
+      if (savedLessonId) lessonId.value = savedLessonId;
+      if (savedMode) apiMode.value = savedMode;
+
+      // Toolbar commands
+      document.querySelectorAll('.toolbar-btn[data-cmd]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const cmd = this.dataset.cmd;
+          const value = this.dataset.value;
+          
+          document.execCommand(cmd, false, value || null);
+          editor.focus();
+        });
+      });
+
+      // Insert special elements
+      document.querySelectorAll('.toolbar-btn[data-insert]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          currentInsertType = this.dataset.insert;
+          showInsertDialog(currentInsertType);
+        });
+      });
+
+      function showInsertDialog(type) {
+        dialogOverlay.classList.add('active');
+        
+        switch(type) {
+          case 'hint':
+            dialogTitle.textContent = '💡 Вставить подсказку';
+            dialogContent.innerHTML = `
+              <div class="input-group">
+                <label>Иконка (эмодзи)</label>
+                <input type="text" id="hintIcon" value="💡">
+              </div>
+              <div class="input-group" style="margin-top: 12px;">
+                <label>Текст подсказки</label>
+                <input type="text" id="hintText" placeholder="Введите текст подсказки">
+              </div>
+            `;
+            break;
+          
+          case 'code':
+            dialogTitle.textContent = '💻 Вставить код';
+            dialogContent.innerHTML = `
+              <div class="input-group">
+                <label>Код</label>
+                <textarea id="codeText" rows="6" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-family:monospace;"></textarea>
+              </div>
+            `;
+            break;
+          
+          case 'spoiler':
+            dialogTitle.textContent = '🔽 Вставить спойлер';
+            dialogContent.innerHTML = `
+              <div class="input-group">
+                <label>Заголовок спойлера</label>
+                <input type="text" id="spoilerTitle" placeholder="Заголовок">
+              </div>
+              <div class="input-group" style="margin-top: 12px;">
+                <label>Содержимое</label>
+                <textarea id="spoilerContent" rows="4" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;"></textarea>
+              </div>
+            `;
+            break;
+          
+          case 'image':
+            dialogTitle.textContent = '🖼️ Вставить изображение';
+            dialogContent.innerHTML = `
+              <div class="input-group">
+                <label>URL изображения</label>
+                <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg">
+              </div>
+              <div class="input-group" style="margin-top: 12px;">
+                <label>Описание (alt)</label>
+                <input type="text" id="imageAlt" placeholder="Описание изображения">
+              </div>
+            `;
+            break;
+        }
+      }
+
+      document.getElementById('dialogInsert').addEventListener('click', function() {
+        let html = '';
+        
+        switch(currentInsertType) {
+          case 'hint':
+            const icon = document.getElementById('hintIcon').value || '💡';
+            const text = document.getElementById('hintText').value;
+            html = `<div class="pb-hint"><div class="pb-hint-icon">${icon}</div><div class="pb-hint-text">${text}</div></div>`;
+            break;
+          
+          case 'code':
+            const code = document.getElementById('codeText').value;
+            html = `<div class="pb-code"><code>${escapeHtml(code)}</code></div>`;
+            break;
+          
+          case 'spoiler':
+            const title = document.getElementById('spoilerTitle').value;
+            const content = document.getElementById('spoilerContent').value;
+            html = `<button class="pb-spoiler" aria-expanded="false">${title}</button><div class="pb-spoiler-content" aria-hidden="true"><p>${content}</p></div>`;
+            break;
+          
+          case 'image':
+            const url = document.getElementById('imageUrl').value;
+            const alt = document.getElementById('imageAlt').value;
+            html = `<img class="pb-zoomable" src="${url}" alt="${alt}">`;
+            break;
+        }
+        
+        if (html) {
+          document.execCommand('insertHTML', false, html);
+        }
+        
+        dialogOverlay.classList.remove('active');
+        editor.focus();
+      });
+
+      document.getElementById('dialogCancel').addEventListener('click', function() {
+        dialogOverlay.classList.remove('active');
+      });
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // View HTML
+      document.getElementById('viewHtmlBtn').addEventListener('click', function() {
+        htmlPreview.textContent = editor.innerHTML;
+        htmlSection.style.display = 'block';
+      });
+
+      document.getElementById('closeHtmlBtn').addEventListener('click', function() {
+        htmlSection.style.display = 'none';
+      });
+
+      document.getElementById('copyHtmlBtn').addEventListener('click', function() {
+        navigator.clipboard.writeText(editor.innerHTML).then(() => {
+          showStatus('HTML скопирован в буфер обмена!', 'success');
+        }).catch(() => {
+          showStatus('Ошибка копирования', 'error');
+        });
+      });
+
+      // Clear
+      document.getElementById('clearBtn').addEventListener('click', function() {
+        if (confirm('Очистить весь контент?')) {
+          editor.innerHTML = '<p>Начните вводить текст...</p>';
+        }
+      });
+
+      // Save
+      document.getElementById('saveBtn').addEventListener('click', async function() {
+        const endpoint = apiEndpoint.value;
+        const id = lessonId.value;
+        const mode = apiMode.value;
+        const html = editor.innerHTML;
+
+        if (!endpoint) {
+          showStatus('Укажите API Endpoint', 'error');
+          return;
+        }
+
+        // Save to localStorage
+        localStorage.setItem('apiEndpoint', endpoint);
+        localStorage.setItem('lessonId', id);
+        localStorage.setItem('apiMode', mode);
+
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              lesson_id: id,
+              content: html,
+              mode: mode
+            })
+          });
+
+          if (response.ok) {
+            showStatus('✅ Сохранено успешно!', 'success');
+          } else {
+            showStatus('❌ Ошибка сохранения', 'error');
+          }
+        } catch (error) {
+          showStatus('❌ Ошибка соединения: ' + error.message, 'error');
+        }
+      });
+
+      // Load
+      document.getElementById('loadBtn').addEventListener('click', async function() {
+        const endpoint = apiEndpoint.value;
+        const id = lessonId.value;
+
+        if (!endpoint) {
+          showStatus('Укажите API Endpoint', 'error');
+          return;
+        }
+
+        try {
+          const response = await fetch(endpoint + '?lesson_id=' + id);
+          const data = await response.json();
+
+          if (data.content) {
+            editor.innerHTML = data.content;
+            showStatus('✅ Загружено успешно!', 'success');
+          } else {
+            showStatus('❌ Контент не найден', 'error');
+          }
+        } catch (error) {
+          showStatus('❌ Ошибка загрузки: ' + error.message, 'error');
+        }
+      });
+
+      function showStatus(message, type) {
+        status.textContent = message;
+        status.className = 'status ' + type;
+        setTimeout(() => {
+          status.className = 'status';
+        }, 3000);
+      }
+
+      // Auto-save to localStorage every 30 seconds
+      setInterval(() => {
+        localStorage.setItem('editor_content_' + lessonId.value, editor.innerHTML);
+      }, 30000);
+
+      // Load from localStorage on start
+      const savedContent = localStorage.getItem('editor_content_' + lessonId.value);
+      if (savedContent) {
+        editor.innerHTML = savedContent;
+      }
+    })();
+  </script>
+</body>
+</html>
+

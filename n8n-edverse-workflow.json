@@ -1,0 +1,352 @@
+{
+  "name": "EdVerse Lessons Editor API",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "edverse-save",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-save",
+      "name": "Webhook Save",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "edverse-save"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "edverse-load",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-load",
+      "name": "Webhook Load",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 500],
+      "webhookId": "edverse-load"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "application": "baseId",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_TABLE_ID",
+          "mode": "id"
+        },
+        "updateKey": "lesson_id",
+        "columnsUi": {
+          "columnValues": [
+            {
+              "column": "lesson_id",
+              "value": "={{ $json.body.lesson_id }}"
+            },
+            {
+              "column": "content",
+              "value": "={{ $json.body.content }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "nocodb-update",
+      "name": "NocoDB Update",
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "1",
+          "name": "NocoDB API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "application": "baseId",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_TABLE_ID",
+          "mode": "id"
+        },
+        "options": {
+          "filters": {
+            "conditions": [
+              {
+                "field": "lesson_id",
+                "operator": "equals",
+                "value": "={{ $json.query.lesson_id }}"
+              }
+            ]
+          },
+          "limit": 1
+        }
+      },
+      "id": "nocodb-get",
+      "name": "NocoDB Get",
+      "type": "n8n-nodes-base.nocoDb",
+      "typeVersion": 1,
+      "position": [460, 500],
+      "credentials": {
+        "nocoDbApiToken": {
+          "id": "1",
+          "name": "NocoDB API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Lesson saved successfully\", \"lesson_id\": $json.lesson_id, \"updated_at\": $json.updated_at } }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "response-save",
+      "name": "Response Save",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "id": "response-load",
+      "name": "Response Load",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.lesson_id }}",
+              "operation": "isNotEmpty"
+            },
+            {
+              "value1": "={{ $json.body.content }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "validate-save",
+      "name": "Validate Save Data",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [340, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.query.lesson_id }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "validate-load",
+      "name": "Validate Load Query",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [340, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": false, \"error\": \"Missing required fields: lesson_id or content\" } }}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "error-save",
+      "name": "Error Response Save",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": false, \"error\": \"Missing required parameter: lesson_id\" } }}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "error-load",
+      "name": "Error Response Load",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 600]
+    }
+  ],
+  "connections": {
+    "Webhook Save": {
+      "main": [
+        [
+          {
+            "node": "Validate Save Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Load": {
+      "main": [
+        [
+          {
+            "node": "Validate Load Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Save Data": {
+      "main": [
+        [
+          {
+            "node": "NocoDB Update",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response Save",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Load Query": {
+      "main": [
+        [
+          {
+            "node": "NocoDB Get",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response Load",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NocoDB Update": {
+      "main": [
+        [
+          {
+            "node": "Response Save",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NocoDB Get": {
+      "main": [
+        [
+          {
+            "node": "Response Load",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+}
+
