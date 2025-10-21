@@ -36,16 +36,15 @@
     {
       "parameters": {
         "operation": "update",
-        "application": "baseId",
-        "base": {
+        "projectId": {
           "__rl": true,
-          "value": "YOUR_BASE_ID",
-          "mode": "id"
+          "value": "",
+          "mode": "list"
         },
         "table": {
           "__rl": true,
-          "value": "YOUR_TABLE_ID",
-          "mode": "id"
+          "value": "",
+          "mode": "list"
         },
         "updateKey": "lesson_id",
         "columnsUi": {
@@ -81,16 +80,15 @@
     {
       "parameters": {
         "operation": "getAll",
-        "application": "baseId",
-        "base": {
+        "projectId": {
           "__rl": true,
-          "value": "YOUR_BASE_ID",
-          "mode": "id"
+          "value": "",
+          "mode": "list"
         },
         "table": {
           "__rl": true,
-          "value": "YOUR_TABLE_ID",
-          "mode": "id"
+          "value": "",
+          "mode": "list"
         },
         "options": {
           "filters": {
