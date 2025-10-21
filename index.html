@@ -366,26 +366,8 @@
       <p>Визуальный редактор контента с автосохранением</p>
     </div>
 
-    <!-- Settings -->
+    <!-- Actions -->
     <div class="section">
-      <div class="section-title">⚙️ Настройки подключения</div>
-      <div class="settings-grid">
-        <div class="input-group">
-          <label>API Endpoint (n8n webhook или NocoDB)</label>
-          <input type="url" id="apiEndpoint" placeholder="https://your-n8n.com/webhook/..." value="">
-        </div>
-        <div class="input-group">
-          <label>ID записи (lesson_id)</label>
-          <input type="text" id="lessonId" placeholder="m8_1" value="m8_1">
-        </div>
-        <div class="input-group">
-          <label>Режим работы</label>
-          <select id="apiMode">
-            <option value="n8n">n8n Webhook</option>
-            <option value="nocodb">NocoDB API</option>
-          </select>
-        </div>
-      </div>
       <div class="actions">
         <button class="btn btn-success" id="loadBtn">📥 Загрузить</button>
         <button class="btn btn-primary" id="saveBtn">💾 Сохранить</button>
@@ -451,9 +433,6 @@
   <script>
     (function() {
       const editor = document.getElementById('editor');
-      const apiEndpoint = document.getElementById('apiEndpoint');
-      const lessonId = document.getElementById('lessonId');
-      const apiMode = document.getElementById('apiMode');
       const status = document.getElementById('status');
       const htmlSection = document.getElementById('htmlSection');
       const htmlPreview = document.getElementById('htmlPreview');
@@ -463,14 +442,21 @@
 
       let currentInsertType = null;
 
-      // Load settings from localStorage
-      const savedEndpoint = localStorage.getItem('apiEndpoint');
-      const savedLessonId = localStorage.getItem('lessonId');
-      const savedMode = localStorage.getItem('apiMode');
+      // Get settings from URL or localStorage (hidden from UI)
+      const urlParams = new URLSearchParams(window.location.search);
+      const apiEndpoint = urlParams.get('api') || localStorage.getItem('apiEndpoint') || '';
+      const lessonId = urlParams.get('lesson') || urlParams.get('lesson_id') || localStorage.getItem('lessonId') || 'm8_1';
+      const apiMode = urlParams.get('mode') || localStorage.getItem('apiMode') || 'n8n';
       
-      if (savedEndpoint) apiEndpoint.value = savedEndpoint;
-      if (savedLessonId) lessonId.value = savedLessonId;
-      if (savedMode) apiMode.value = savedMode;
+      // Save to localStorage for next time
+      if (apiEndpoint) localStorage.setItem('apiEndpoint', apiEndpoint);
+      if (lessonId) localStorage.setItem('lessonId', lessonId);
+      if (apiMode) localStorage.setItem('apiMode', apiMode);
+
+      // Show current lesson in header
+      if (lessonId) {
+        document.querySelector('.header p').textContent = 'Редактирование: ' + lessonId;
+      }
 
       // Toolbar commands
       document.querySelectorAll('.toolbar-btn[data-cmd]').forEach(btn => {
@@ -622,31 +608,23 @@
 
       // Save
       document.getElementById('saveBtn').addEventListener('click', async function() {
-        const endpoint = apiEndpoint.value;
-        const id = lessonId.value;
-        const mode = apiMode.value;
         const html = editor.innerHTML;
 
-        if (!endpoint) {
-          showStatus('Укажите API Endpoint', 'error');
+        if (!apiEndpoint) {
+          showStatus('⚠️ API не настроен. Используйте ?api=URL в адресе', 'error');
           return;
         }
 
-        // Save to localStorage
-        localStorage.setItem('apiEndpoint', endpoint);
-        localStorage.setItem('lessonId', id);
-        localStorage.setItem('apiMode', mode);
-
         try {
-          const response = await fetch(endpoint, {
+          const response = await fetch(apiEndpoint, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              lesson_id: id,
+              lesson_id: lessonId,
               content: html,
-              mode: mode
+              mode: apiMode
             })
           });
 
@@ -662,16 +640,13 @@
 
       // Load
       document.getElementById('loadBtn').addEventListener('click', async function() {
-        const endpoint = apiEndpoint.value;
-        const id = lessonId.value;
-
-        if (!endpoint) {
-          showStatus('Укажите API Endpoint', 'error');
+        if (!apiEndpoint) {
+          showStatus('⚠️ API не настроен. Используйте ?api=URL в адресе', 'error');
           return;
         }
 
         try {
-          const response = await fetch(endpoint + '?lesson_id=' + id);
+          const response = await fetch(apiEndpoint + '?lesson_id=' + lessonId);
           const data = await response.json();
 
           if (data.content) {
